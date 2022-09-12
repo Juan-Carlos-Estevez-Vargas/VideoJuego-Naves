@@ -17,27 +17,38 @@ import javax.swing.Timer;
  */
 public class JuegoPanel extends JPanel implements KeyListener {
 
+    /**
+     * Variables globales.
+     */
     public Timer t, enemigas;
     public Rectangle2D nave;
-    public int xNave = 235, enemigasIni = 20, enemigasAumentoX = 0, enemigasAumentoY = 0, moviEnemigas =10;
+    public int xNave = 235, enemigasIni = 20, enemigasAumentoX = 0, enemigasAumentoY = 0, moviEnemigas = 10;
     public boolean derechaNave = false, izquierdaNave = false, derechaEnemigas = true, izquierdaEnemigas = false;
     public Graphics2D g2;
     public Rectangle2D[][] navesEnemigas = new Rectangle2D[2][8];
 
+    /**
+     * Constructor de clase.
+     *
+     * @param nombre del usuario que está jugando.
+     */
     public JuegoPanel(String nombre) {
         this.setBackground(Color.red);
         this.setFocusable(true);
         this.setBounds(300, 100, 500, 500);
         this.setPreferredSize(new Dimension(500, 500));
         this.addKeyListener(this);
-        
+
         timerNave();
         t.start();
-        
+
         timerEnemigas();
         enemigas.start();
     }
 
+    /**
+     * Timer de la nave principal (movimiento).
+     */
     private void timerNave() {
         t = new Timer(10, (ActionEvent e) -> {
             if (derechaNave && xNave <= 470) {
@@ -58,22 +69,25 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
         nave = new Rectangle2D.Double(xNave, 440, 30, 60);
         g2.fill(nave);
-        
+
         inicializarEnemigas();
     }
-    
+
+    /**
+     * Timer de las naves enemigas (movimiento).
+     */
     private void timerEnemigas() {
         enemigas = new Timer(60, (ActionEvent e) -> {
-            if(derechaEnemigas){
-                moviEnemigas+=5;
-                if(moviEnemigas>=70){
+            if (derechaEnemigas) {
+                moviEnemigas += 5;
+                if (moviEnemigas >= 70) {
                     derechaEnemigas = false;
                     izquierdaEnemigas = true;
                 }
             }
-             if(izquierdaEnemigas){
-                moviEnemigas-=5;
-                if(moviEnemigas<=5){
+            if (izquierdaEnemigas) {
+                moviEnemigas -= 5;
+                if (moviEnemigas <= 5) {
                     derechaEnemigas = true;
                     izquierdaEnemigas = false;
                 }
@@ -82,20 +96,23 @@ public class JuegoPanel extends JPanel implements KeyListener {
         });
     }
 
+    /**
+     * Se encarga de construir las naves enemigas en el panel.
+     */
     private void inicializarEnemigas() {
         enemigasAumentoX = 0;
         enemigasAumentoY = 0;
-        
+
         for (int filas = 0; filas < 2; filas++) {
             for (int columnas = 0; columnas < 8; columnas++) {
                 navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni + enemigasAumentoX + moviEnemigas, 10 + enemigasAumentoY, 35, 50);
-                enemigasAumentoX+=50;
+                enemigasAumentoX += 50;
                 g2.fill(navesEnemigas[filas][columnas]);
             }
             enemigasAumentoX = 0;
             enemigasAumentoY = 65;
         }
-        
+
         repaint();
     }
 
