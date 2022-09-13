@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -24,11 +25,15 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public Rectangle2D nave;
     public int xNave = 235, enemigasIni = 20, enemigasAumentoX = 0, contadorCaer = 0;
     public int moviEnemigas = 10, enemigasAumentoY = 0, aleatorio1, aleatorio2;
+    public int disparadas = 0, contadorRecargar = 0;
     public boolean derechaNave = false, izquierdaNave = false, derechaEnemigas = true;
     public boolean izquierdaEnemigas = false, segundaFila = false, caer = false;
     public Graphics2D g2;
     public Rectangle2D[][] navesEnemigas = new Rectangle2D[2][8];
     public int[][] yEnemigas = new int[2][8];
+    public Ellipse2D[] disparos =  new Ellipse2D[20];
+    public int[] xDisparos = new int[20];
+    public int[] yDisparos = new int[20];
 
     /**
      * Constructor de clase.
@@ -42,6 +47,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
         this.setPreferredSize(new Dimension(500, 500));
         this.addKeyListener(this);
 
+        inicializarDisparos();
         inicializarAlturaEnemigas();
 
         timerNave();
@@ -84,6 +90,16 @@ public class JuegoPanel extends JPanel implements KeyListener {
             contadorCaer = 0;
         }
     }
+    
+    /**
+     * Inicializa las balas de los disparos en la posición donde está
+     * la nave (las balas salen de la nave).
+     */
+    private void inicializarDisparos() {
+        for (int i = 0; i < 20; i++) {
+            yDisparos[i] = 440;
+        }
+    }
 
     /**
      * Timer de la nave principal (movimiento).
@@ -95,6 +111,11 @@ public class JuegoPanel extends JPanel implements KeyListener {
             }
             if (izquierdaNave && xNave >= 0) {
                 xNave -= 5;
+            }
+            
+            // Movimiento de las balas hacia arriba
+            for (int i = 0; i < disparadas; i++) {
+                yDisparos[i]-=3;
             }
             repaint();
         });
@@ -108,6 +129,14 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
         nave = new Rectangle2D.Double(xNave, 440, 30, 60);
         g2.fill(nave);
+        
+        /**
+         * Dibujando las balas en el panel.
+         */
+        for (int i = 0; i < disparadas; i++) {
+            disparos[i] = new Ellipse2D.Double(xDisparos[i], yDisparos[i], 10, 20);
+            g2.fill(disparos[i]);
+        }
 
         inicializarEnemigas();
     }
@@ -177,7 +206,11 @@ public class JuegoPanel extends JPanel implements KeyListener {
         }
 
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            System.out.println("Disparar");
+            if (contadorRecargar<20){
+                xDisparos[disparadas] = (int) nave.getCenterX();
+                disparadas++;
+                contadorRecargar++;
+            }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_R) {
