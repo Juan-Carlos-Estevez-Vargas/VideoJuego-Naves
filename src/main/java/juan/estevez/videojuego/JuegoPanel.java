@@ -2,6 +2,7 @@ package juan.estevez.videojuego;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -157,7 +158,17 @@ public class JuegoPanel extends JPanel implements KeyListener {
             g2.fill(disparos[i]);
         }
 
+        escribir();
         inicializarEnemigas();
+    }
+    
+    private void escribir(){
+        g2.setFont(new Font("Tahoma", Font.BOLD, 16));
+        g2.drawString("Vidas:  ", 20, 20);        
+        g2.drawString("Nivel:  ", 150, 20);
+        g2.drawString("Score:  ", 260, 20);
+        g2.drawString("Balas:  ", 370, 20);
+
     }
 
     /**
