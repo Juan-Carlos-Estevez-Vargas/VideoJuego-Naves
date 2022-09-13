@@ -27,6 +27,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public int xNave = 235, enemigasIni = 20, enemigasAumentoX = 0, contadorCaer = 0;
     public int moviEnemigas = 10, enemigasAumentoY = 0, aleatorio1, aleatorio2;
     public int disparadas = 0, contadorRecargar = 0;
+    public int vidas = 10, nivel = 1, score = 0, balas = 20;
     public boolean derechaNave = false, izquierdaNave = false, derechaEnemigas = true;
     public boolean izquierdaEnemigas = false, segundaFila = false, caer = false;
     public Graphics2D g2;
@@ -35,6 +36,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public Ellipse2D[] disparos = new Ellipse2D[20];
     public int[] xDisparos = new int[20];
     public int[] yDisparos = new int[20];
+    public int[][] vivas = new int[2][8];
 
     /**
      * Constructor de clase.
@@ -50,12 +52,24 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
         inicializarDisparos();
         inicializarAlturaEnemigas();
+        inicializarVivas();
 
         timerNave();
         t.start();
 
         timerEnemigas();
         enemigas.start();
+    }
+
+    /**
+     * Inicializa las naves vivas.
+     */
+    private void inicializarVivas() {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 8; j++) {
+                vivas[i][j] = 1;
+            }
+        }
     }
 
     /**
@@ -121,24 +135,61 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     yDisparos[i] -= 3;
                 }
             }
-            
-            for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 8; j++) {
-                    for (int k = 0; k < disparadas; k++) {
-                        
-                        /**
-                         * Si alguno de los disparos colisiona con alguna nave enemiga,
-                         * desaparecemos la nave y el disparo del frame.
-                         */
-                        if(disparos[k].intersects(navesEnemigas[i][j])){
-                            yDisparos[k]=-40;
-                            yEnemigas[i][j]=600;
-                        }
+            repaint();
+        });
+    }
+
+    /**
+     * Se encarga de detectar las colisiones de las balas con las naves
+     * enemigas.
+     */
+    private void interseccionBala() {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 8; j++) {
+                for (int k = 0; k < disparadas; k++) {
+
+                    /**
+                     * Si alguno de los disparos colisiona con alguna nave
+                     * enemiga, desaparecemos la nave y el disparo del frame.
+                     */
+                    if (disparos[k].intersects(navesEnemigas[i][j])) {
+                        yDisparos[k] = -40;
+                        yEnemigas[i][j] = 600;
                     }
                 }
             }
-            repaint();
-        });
+        }
+    }
+
+    /**
+     * Se encarga de revisar si aún quedan naves enemigas vias, cuando ya no
+     * queden naves enemigas vivas terminará el juego.
+     *
+     * @return 1 para salir del programa.
+     */
+    private int revisarVivas() {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (yEnemigas[i][j] >= 530) {
+                    vivas[i][j] = 0;
+                }
+                if (vivas[i][j] == 1) {
+                    return 1;
+                }
+            }
+        }
+        gameOver();
+        return 1;
+    }
+
+    /**
+     * Se encarga de detener la ejecución del juego ya que el usuario ha
+     * perdido.
+     */
+    private void gameOver() {
+        g2.drawString("Game Over\nPresiona ENTER para continuar\n", 130, 250);
+        t.stop();
+        enemigas.stop();
     }
 
     @Override
@@ -159,15 +210,17 @@ public class JuegoPanel extends JPanel implements KeyListener {
         }
 
         escribir();
+        interseccionBala();
+        revisarVivas();
         inicializarEnemigas();
     }
-    
-    private void escribir(){
+
+    private void escribir() {
         g2.setFont(new Font("Tahoma", Font.BOLD, 16));
-        g2.drawString("Vidas:  ", 20, 20);        
-        g2.drawString("Nivel:  ", 150, 20);
-        g2.drawString("Score:  ", 260, 20);
-        g2.drawString("Balas:  ", 370, 20);
+        g2.drawString("Vidas:  " + vidas, 20, 20);
+        g2.drawString("Nivel:  " + nivel, 150, 20);
+        g2.drawString("Score:  " + score, 260, 20);
+        g2.drawString("Balas:  " + balas, 370, 20);
 
     }
 
@@ -262,7 +315,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
         // Recargar balas.
         if (e.getKeyCode() == KeyEvent.VK_R) {
-            contadorRecargar = 0;
+            if (contadorRecargar == 5) {
+                contadorRecargar = 0;
+            }
         }
     }
 
