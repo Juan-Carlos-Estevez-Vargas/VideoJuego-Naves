@@ -22,10 +22,13 @@ public class JuegoPanel extends JPanel implements KeyListener {
      */
     public Timer t, enemigas;
     public Rectangle2D nave;
-    public int xNave = 235, enemigasIni = 20, enemigasAumentoX = 0, enemigasAumentoY = 0, moviEnemigas = 10;
-    public boolean derechaNave = false, izquierdaNave = false, derechaEnemigas = true, izquierdaEnemigas = false;
+    public int xNave = 235, enemigasIni = 20, enemigasAumentoX = 0, contadorCaer = 0;
+    public int moviEnemigas = 10, enemigasAumentoY = 0, aleatorio1, aleatorio2;
+    public boolean derechaNave = false, izquierdaNave = false, derechaEnemigas = true;
+    public boolean izquierdaEnemigas = false, segundaFila = false, caer = false;
     public Graphics2D g2;
     public Rectangle2D[][] navesEnemigas = new Rectangle2D[2][8];
+    public int[][] yEnemigas = new int[2][8];
 
     /**
      * Constructor de clase.
@@ -39,11 +42,47 @@ public class JuegoPanel extends JPanel implements KeyListener {
         this.setPreferredSize(new Dimension(500, 500));
         this.addKeyListener(this);
 
+        inicializarAlturaEnemigas();
+
         timerNave();
         t.start();
 
         timerEnemigas();
         enemigas.start();
+    }
+
+    /**
+     * Inicializa la altura de las naves enemigas en el tablero.
+     */
+    private void inicializarAlturaEnemigas() {
+        for (int fila = 0; fila < 2; fila++) {
+            for (int columna = 0; columna < 8; columna++) {
+                yEnemigas[fila][columna] = 20;
+                if (segundaFila) {
+                    yEnemigas[fila][columna] = 80;
+                }
+            }
+            segundaFila = true;
+        }
+    }
+
+    /**
+     * Se encarga de hacer que las naves ataquen, es decir, que bajen una por una
+     * a intentar destruir la nave principal, esto se hace de manera aleatorio.
+     */
+    private void atacar() {
+        if (caer == false) {
+            while (yEnemigas[aleatorio1][aleatorio2] >= 550) {
+                aleatorio1 = (int) (Math.random() * 2);
+                aleatorio2 = (int) (Math.random() * 8);
+            }
+        }
+        yEnemigas[aleatorio1][aleatorio2] += 10;
+
+        if (yEnemigas[aleatorio1][aleatorio2] >= 550) {
+            caer = false;
+            contadorCaer = 0;
+        }
     }
 
     /**
@@ -83,6 +122,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
                 if (moviEnemigas >= 70) {
                     derechaEnemigas = false;
                     izquierdaEnemigas = true;
+                    contadorCaer += 1;
                 }
             }
             if (izquierdaEnemigas) {
@@ -91,6 +131,10 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     derechaEnemigas = true;
                     izquierdaEnemigas = false;
                 }
+            }
+
+            if (contadorCaer >= 3) {
+                atacar();
             }
             repaint();
         });
@@ -105,7 +149,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
         for (int filas = 0; filas < 2; filas++) {
             for (int columnas = 0; columnas < 8; columnas++) {
-                navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni + enemigasAumentoX + moviEnemigas, 10 + enemigasAumentoY, 35, 50);
+                navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni + enemigasAumentoX + moviEnemigas, yEnemigas[filas][columnas], 35, 50);
                 enemigasAumentoX += 50;
                 g2.fill(navesEnemigas[filas][columnas]);
             }
