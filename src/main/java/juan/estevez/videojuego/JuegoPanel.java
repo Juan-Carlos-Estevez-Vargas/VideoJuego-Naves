@@ -161,9 +161,23 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     izquierdaEnemigas = false;
                 }
             }
-
-            if (contadorCaer >= 3) {
+            if (contadorCaer >= 2) {
                 atacar();
+            }
+            
+            /**
+             * Recorriendo las naves enemigas y verificando si alguna de 
+             * ellas ha colisionado con la nave principal, de ser así,
+             * habremos perdido el juego.
+             */
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if(nave.intersects(navesEnemigas[i][j])){
+                        System.out.println("choque");
+                        t.stop();
+                        enemigas.stop();
+                    }
+                }
             }
             repaint();
         });
@@ -178,7 +192,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
         for (int filas = 0; filas < 2; filas++) {
             for (int columnas = 0; columnas < 8; columnas++) {
-                navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni + enemigasAumentoX + moviEnemigas, yEnemigas[filas][columnas], 35, 50);
+                navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni + enemigasAumentoX + moviEnemigas, yEnemigas[filas][columnas]+20, 35, 50);
                 enemigasAumentoX += 50;
                 g2.fill(navesEnemigas[filas][columnas]);
             }
@@ -195,26 +209,30 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        // Mover hacia la derecha la nave principal.
         if (e.getKeyCode() == KeyEvent.VK_D || e.getKeyCode() == KeyEvent.VK_RIGHT) {
             derechaNave = true;
             izquierdaNave = false;
         }
 
+        // Mover hacia la izquierda la nave principal.
         if (e.getKeyCode() == KeyEvent.VK_A || e.getKeyCode() == KeyEvent.VK_LEFT) {
             derechaNave = false;
             izquierdaNave = true;
         }
 
+        // Disparar desde la nave principal.
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            if (contadorRecargar<20){
+            if (contadorRecargar<5){
                 xDisparos[disparadas] = (int) nave.getCenterX();
                 disparadas++;
                 contadorRecargar++;
             }
         }
 
+        // Recargar balas..
         if (e.getKeyCode() == KeyEvent.VK_R) {
-            System.out.println("Recargando");
+            contadorRecargar = 0;
         }
     }
 
