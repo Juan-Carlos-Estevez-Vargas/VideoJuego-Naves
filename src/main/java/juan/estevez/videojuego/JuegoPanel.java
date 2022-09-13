@@ -26,7 +26,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public Rectangle2D nave;
     public int xNave = 235, enemigasIni = 20, enemigasAumentoX = 0, contadorCaer = 0;
     public int moviEnemigas = 10, enemigasAumentoY = 0, aleatorio1, aleatorio2;
-    public int disparadas = 0, contadorRecargar = 0;
+    public int disparadas = 0, contadorRecargar = 0, puntos = 100;
     public int vidas = 10, nivel = 1, score = 0, balas = 20;
     public boolean derechaNave = false, izquierdaNave = false, derechaEnemigas = true;
     public boolean izquierdaEnemigas = false, segundaFila = false, caer = false;
@@ -155,6 +155,8 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     if (disparos[k].intersects(navesEnemigas[i][j])) {
                         yDisparos[k] = -40;
                         yEnemigas[i][j] = 600;
+                        score += puntos;
+                        vivas[i][j] = 0;
                     }
                 }
             }
@@ -192,6 +194,28 @@ public class JuegoPanel extends JPanel implements KeyListener {
         enemigas.stop();
     }
 
+    /**
+     * Se encarga de restar vidas al usuario en caso tal que deje pasar una
+     * nave.
+     *
+     * @return 1
+     */
+    private int restarVidas() {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 8; j++) {
+                /**
+                 * Si la nave enemiga pasó y está viva.
+                 */
+                if (yEnemigas[i][j] >= 520 && vivas[i][j] == 1) {
+                    vidas--;
+                    vivas[i][j] = 0;
+                    return 1;
+                }
+            }
+        }
+        return 1;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -213,6 +237,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
         interseccionBala();
         revisarVivas();
         inicializarEnemigas();
+        restarVidas();
     }
 
     private void escribir() {
@@ -222,6 +247,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
         g2.drawString("Score:  " + score, 260, 20);
         g2.drawString("Balas:  " + balas, 370, 20);
 
+        if (contadorRecargar == 5 && disparadas < 15) {
+            g2.drawString("Presiona R para recargar", 180, 300);
+        }
     }
 
     /**
@@ -309,6 +337,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
             if (contadorRecargar < 5 && disparadas < 15) {
                 xDisparos[disparadas] = (int) nave.getCenterX();
                 disparadas++;
+                balas--;
                 contadorRecargar++;
             }
         }
