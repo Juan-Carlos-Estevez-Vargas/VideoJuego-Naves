@@ -1,13 +1,13 @@
 # Video Juego Naves Espaciales
 Juego muy sencillo e intuitivo desarrollado en el lenguaje de programación Java, el cual consta de una nave principal y 16 naves enemigas las cuales intentarán pasar la frontera; cada nivel va teniendo un poco más de dificultad..
 
-* ## Administrador.
-En este apartado, el usuario admin es capáz de administrar el contenido subido al portal, puede registrar un nuevo libro, modificarlo o eliminarlo.
+### Controles:
 
-### Credenciales de acceso:
-
-* Usuario  ->  Juank
-* Contraseña  ->  1234
+* A       ->  Ir a la izquierda
+* D       ->  Ir a la derecha
+* Espacio ->  Disparar
+* R       ->  Recargar balas
+* F       ->  Reiniciar juego
 
 # Mis redes sociales
 
