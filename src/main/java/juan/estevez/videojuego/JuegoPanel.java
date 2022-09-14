@@ -30,6 +30,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public int vidas = 10, nivel = 1, score = 0, balas = 20;
     public boolean derechaNave = false, izquierdaNave = false, derechaEnemigas = true;
     public boolean izquierdaEnemigas = false, segundaFila = false, caer = false;
+    public boolean acabado = false, fin = false;
     public Graphics2D g2;
     public Rectangle2D[][] navesEnemigas = new Rectangle2D[2][8];
     public int[][] yEnemigas = new int[2][8];
@@ -37,6 +38,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public int[] xDisparos = new int[20];
     public int[] yDisparos = new int[20];
     public int[][] vivas = new int[2][8];
+    public int tiempoNave = 10, tiempoEnemigas = 90;
 
     /**
      * Constructor de clase.
@@ -121,7 +123,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
      * Timer de la nave principal (movimiento).
      */
     private void timerNave() {
-        t = new Timer(10, (ActionEvent e) -> {
+        t = new Timer(tiempoNave, (ActionEvent e) -> {
             if (derechaNave && xNave <= 470) {
                 xNave += 5;
             }
@@ -185,11 +187,12 @@ public class JuegoPanel extends JPanel implements KeyListener {
     }
 
     /**
-     * Se encarga de detener la ejecución del juego ya que el usuario ha
-     * perdido.
+     * Se encarga de detener la ejecución del juego ya que el usuario ha perdido
+     * o pasado de nivel.
      */
     private void gameOver() {
-        g2.drawString("Game Over\nPresiona ENTER para continuar\n", 130, 250);
+        acabado = true;
+        g2.drawString("Presiona ENTER para continuar\n", 130, 250);
         t.stop();
         enemigas.stop();
     }
@@ -233,6 +236,12 @@ public class JuegoPanel extends JPanel implements KeyListener {
             g2.fill(disparos[i]);
         }
 
+        if (vidas == 0) {
+            fin = true;
+            t.stop();
+            enemigas.stop();
+        }
+
         escribir();
         interseccionBala();
         revisarVivas();
@@ -240,15 +249,25 @@ public class JuegoPanel extends JPanel implements KeyListener {
         restarVidas();
     }
 
+    /**
+     * Pinta las variables de juego en el panel (Vidas, puntos, balas, nivel).
+     */
     private void escribir() {
         g2.setFont(new Font("Tahoma", Font.BOLD, 16));
         g2.drawString("Vidas:  " + vidas, 20, 20);
-        g2.drawString("Nivel:  " + nivel, 150, 20);
-        g2.drawString("Score:  " + score, 260, 20);
+        g2.drawString("Nivel:  " + nivel, 120, 20);
+        g2.drawString("Score:  " + score, 220, 20);
         g2.drawString("Balas:  " + balas, 370, 20);
 
-        if (contadorRecargar == 5 && disparadas < 15) {
+        if (contadorRecargar == 5 && disparadas < 20) {
             g2.drawString("Presiona R para recargar", 180, 300);
+        }
+
+        /**
+         * Reinicia el juego cuando el usuario pierda.
+         */
+        if (fin) {
+            g2.drawString("Perdiste, Presiona F para reiniciar", 130, 250);
         }
     }
 
@@ -256,7 +275,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
      * Timer de las naves enemigas (movimiento).
      */
     private void timerEnemigas() {
-        enemigas = new Timer(60, (ActionEvent e) -> {
+        enemigas = new Timer(tiempoEnemigas, (ActionEvent e) -> {
             if (derechaEnemigas) {
                 moviEnemigas += 5;
                 if (moviEnemigas >= 70) {
@@ -284,7 +303,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
             for (int i = 0; i < 2; i++) {
                 for (int j = 0; j < 8; j++) {
                     if (nave.intersects(navesEnemigas[i][j])) {
-                        System.out.println("choque");
+                        fin = true;
                         t.stop();
                         enemigas.stop();
                     }
@@ -314,6 +333,65 @@ public class JuegoPanel extends JPanel implements KeyListener {
         repaint();
     }
 
+    /**
+     * Devuelve el juego a su estado inicial, ya que el usuario perdió y debe
+     * empezar de nuevo.
+     */
+    private void derrota() {
+        nivel = 1;
+        vidas = 10;
+        puntos = 100;
+        score = 0;
+        balas = 20;
+        disparadas = 0;
+        segundaFila = false;
+        contadorRecargar = 0;
+        contadorCaer = 0;
+        caer = false;
+        fin = false;
+        acabado = false;
+        inicializarDisparos();
+        inicializarAlturaEnemigas();
+        inicializarVivas();
+        timerNave();
+        t.start();
+        enemigas.start();
+        tiempoNave = 10;
+        tiempoEnemigas = 90;
+    }
+
+    /**
+     * Reinicia las variables de juego para que el usuario pueda iniciar un
+     * nivel nuevo.
+     */
+    private void reiniciar() {
+        nivel++;
+        puntos += 100;
+        balas = 20;
+        disparadas = 0;
+        segundaFila = false;
+        contadorRecargar = 0;
+        contadorCaer = 0;
+        caer = false;
+        fin = false;
+        acabado = false;
+        inicializarDisparos();
+        inicializarAlturaEnemigas();
+        inicializarVivas();
+        timerNave();
+        t.start();
+        enemigas.start();
+
+        if (nivel % 2 == 0 && tiempoNave >= 2) {
+            tiempoNave -= 3;
+            vidas++;
+        }
+
+        if (tiempoEnemigas >= 9) {
+            tiempoEnemigas -= 8;
+        }
+    }
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
@@ -334,7 +412,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
 
         // Disparar desde la nave principal.
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            if (contadorRecargar < 5 && disparadas < 15) {
+            if (contadorRecargar < 5 && disparadas < 20) {
                 xDisparos[disparadas] = (int) nave.getCenterX();
                 disparadas++;
                 balas--;
@@ -348,6 +426,17 @@ public class JuegoPanel extends JPanel implements KeyListener {
                 contadorRecargar = 0;
             }
         }
+
+        // Reinicia el juego para que el usuario inicie un nuevo nivel.
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && acabado == true) {
+            reiniciar();
+        }
+
+        // Termina el juego y empieza uno nuevo.
+        if (e.getKeyCode() == KeyEvent.VK_F && fin == true) {
+            derrota();
+        }
+
     }
 
     @Override
