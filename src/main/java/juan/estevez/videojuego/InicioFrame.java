@@ -111,10 +111,15 @@ public class InicioFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_btnJugarActionPerformed
 
     private void cmbControlesCreditosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbControlesCreditosActionPerformed
-        if (cmbControlesCreditos.getSelectedItem() == "Créditos"){
+        if (cmbControlesCreditos.getSelectedItem() == "Créditos") {
             CreditosFrame creditosFrame = new CreditosFrame();
             creditosFrame.setVisible(true);
             creditosFrame.setLocationRelativeTo(null);
+            this.dispose();
+        } else if (cmbControlesCreditos.getSelectedItem() == "Controles") {
+            ControlesFrame controlesFrame = new ControlesFrame();
+            controlesFrame.setVisible(true);
+            controlesFrame.setLocationRelativeTo(null);
             this.dispose();
         }
     }//GEN-LAST:event_cmbControlesCreditosActionPerformed
